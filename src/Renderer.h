@@ -4,6 +4,9 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <assert.h>
+#include <functional>
+#include <thread>
 
 #pragma once
 
@@ -17,22 +20,45 @@ class IRenderable
 class ArcGauge : public IRenderable
 {
    public:
+   ArcGauge(uint32_t min, uint32_t max) : mMin(min), mMax(max) 
+   {
+      assert(mMin < mMax);
+   }
+   
+   ArcGauge() = delete;
 
    
    void Update(uint32_t val) 
    {
       mValue = val;
+
+      if (mValue < mMin)
+      {
+         mValue = mMin;
+      } 
+      
+      if (mValue > mMax)
+      {
+         mValue = mMax;
+      }
    }
    
    void Render(cairo_t *cr) override final
    {
+      uint32_t span = mMax - mMin;
+      float p = float(mValue - mMin) / float(span);
+      
+      printf("p %u %f\n", mValue, p);
+
       cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
       cairo_set_line_width (cr, 10.0);
-      cairo_arc (cr, 200, 200, 100, (0)*(M_PI/180.0), (270.0)*(M_PI/180.0));
+      cairo_arc (cr, 200, 200, 100, (0)*(M_PI/180.0), (p*360.0)*(M_PI/180.0));
       cairo_stroke (cr);
    }
    
    private:
+   
+   const uint32_t mMin, mMax;
    
    uint32_t mValue = 0;
 };
@@ -42,9 +68,11 @@ class Renderer
 {
 public:
 
-using RenderPtr_t = std::unique_ptr<IRenderable>;
+using RenderPtr_t = std::shared_ptr<IRenderable>;
 
 Renderer()
+:
+mThread([this](){RenderLoop();})
 {
    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
    {
@@ -75,12 +103,21 @@ Renderer()
 ~Renderer()
 {
    mRun = false;
+   mThread.join();
    SDL_DestroyTexture(mTexture);
    SDL_DestroyRenderer(mRenderer);
    SDL_DestroyWindow(mWindow);
    SDL_Quit();
 }
 
+
+
+void AddItem(IRenderable* r)
+{
+   mRenderables.push_back(r);
+}
+
+private:
 void RenderLoop()
 {
    while (mRun)
@@ -136,14 +173,6 @@ void RenderLoop()
    }
 
 }
-
-void AddItem(RenderPtr_t r)
-{
-   mRenderables.push_back(std::move(r));
-}
-
-private:
-
    static constexpr unsigned int mSizeX = 800;
    static constexpr unsigned int mSizeY = 480;
 
@@ -153,7 +182,8 @@ private:
    SDL_Texture* mTexture = NULL;
    bool mRun = true;
    
-   std::vector<RenderPtr_t> mRenderables;
+   std::vector<IRenderable*> mRenderables;
+   std::thread mThread;
 
 };
 

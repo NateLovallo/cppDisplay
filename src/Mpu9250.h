@@ -23,10 +23,19 @@ class Mpu9250
 {
 public:
 	///////////////////////////////////////////////////////////////////////////////
-   Mpu9250() :
+   Mpu9250(bool debug = true) :
 		mFd(open("/dev/i2c-1", O_RDWR))
    {
 		assert(mFd >= 0);
+      
+      if (debug)
+      {
+         mDebugOut = stderr;
+      }
+      else
+      {
+         mDebugOut = fopen("/dev/null", "RW");
+      }
 
 		Reset();
 
@@ -35,7 +44,7 @@ public:
 		assert(r == 0);
 		(void)0;
 
-		fprintf(stderr, "WHOAMI reported \t0x%x\n", ID);
+		fprintf(mDebugOut, "WHOAMI reported \t0x%x\n", ID);
 
 		if (ID != 0x71)
 		{
@@ -43,28 +52,12 @@ public:
 		}
 		
 
-
 		SetAccelFsr();
+
+		SetSampleRate();
 
 		std::this_thread::sleep_for(100ms);
 
-		unsigned char data[6] = {};
-		r = I2CRead(MPU9250_ACCEL_XOUT_H, 6, &ID);
-		assert(r == 0);
-		(void)0;
-
-		int x = (data[0] << 8) | data[1];
-		int y = (data[2] << 8) | data[3];
-		int z = (data[4] << 8) | data[5];
-		fprintf(stderr, "X \t%d \n", x);
-		fprintf(stderr, "Y \t%d \n", y);
-		fprintf(stderr, "Z \t%d \n", z);
-
-		r = I2CRead(MPU9250_TEMP_OUT_H, 2, &ID);
-		assert(r == 0);
-		(void)0;
-		int temp = (data[0] << 8) | data[1];
-		fprintf(stderr, "Temp \t%d \n", temp);
    }
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -72,6 +65,46 @@ public:
    {
 		close(mFd);
    }
+
+	///////////////////////////////////////////////////////////////////////////////
+   int SampleAccelerometer()	
+   {
+		unsigned char data[6] = {};
+		int r = I2CRead(MPU9250_ACCEL_XOUT_H, 6, data);
+		assert(r == 0);
+		(void)0;
+
+		int x = (data[0] << 8) | data[1];
+		int y = (data[2] << 8) | data[3];
+		int z = (data[4] << 8) | data[5];
+		//fprintf(mDebugOut, "X \t%d \n", x);
+		//fprintf(mDebugOut, "Y \t%d \n", y);
+		//fprintf(mDebugOut, "Z \t%d \n", z);
+
+		return z;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	void SampleTemperature()
+	{
+		unsigned char data[2] = {};
+		int r = I2CRead(MPU9250_TEMP_OUT_H, 2, data);
+		assert(r == 0);
+		(void)0;
+		int temp = (data[0] << 8) | data[1];
+
+		// data sheet says TEMP_degC = ((TEMP_OUT  RoomTemp_Offset) / Temp_Sensitivity) + 21degC
+		// RoomTemp_Offset is not defined anywhere in reg map or data sheet
+		// TDK driver uses 0?
+		// TDK driver uses 321 for temp sens
+
+		temp = (temp - 0) / (321) + 21;
+
+		// dungarees frankenstein
+		temp = (temp * 9.0f / 5.0f) + 32.0f;
+
+		//fprintf(mDebugOut, "Temp \t%d \n", temp);
+	}
 
 	///////////////////////////////////////////////////////////////////////////////
 	void Reset()
@@ -101,14 +134,30 @@ public:
 	{
 		// TODO make configurable
 
-		unsigned char data = (01 << 3); // 4G
+		unsigned char data = (01 << 3); // 4G range
 		int r = I2CWrite(MPU9250_ACCEL_CONFIG, 1, &data);
+		assert(r == 0);
+		(void)r;
+
+		// Bypass filters
+		data = ACCEL_CONFIG_2_ACCEL_FCHOICE_B;
+		// 0 does bypass, but its inverted
+		r = I2CWrite(MPU9250_ACCEL_CONFIG_2, 1, &data);
 		assert(r == 0);
 		(void)r;
 	}
 
 	
+	///////////////////////////////////////////////////////////////////////////////
+	void SetSampleRate ()
+	{
+		// TODO make configurable
 
+		unsigned char data = 19; // 20 Mhz / (1 + 19)
+		int r = I2CWrite(MPU9250_SMPLRT_DIV, 1, &data);
+		assert(r == 0);
+		(void)r;
+	}
 
 private:
 
@@ -120,7 +169,7 @@ private:
 		unsigned char* data)
 	{
 		int retval = 0;
-		fprintf(stderr, "write \t%x \t%u\n", reg_addr, length);
+		//fprintf(mDebugOut, "write \t%x \t%u\n", reg_addr, length);
 
 		unsigned char send_data[256 + 1] = {};
 
@@ -150,7 +199,7 @@ private:
 
 		if (ioctl(mFd, I2C_RDWR, &msgset) < 0)
 		{
-			fprintf(stderr, "Oh shit write %d %s\n", errno, strerror(errno));
+			fprintf(mDebugOut, "Oh shit write %d %s\n", errno, strerror(errno));
 			retval = -1;
 		}
 
@@ -165,7 +214,7 @@ private:
 	{
 		int retval = 0;
 
-		fprintf(stderr, "read \t%x \t%u\n", reg_addr, length);
+		//fprintf(mDebugOut, "read \t%x \t%u\n", reg_addr, length);
 
 		assert(mFd != -1);
 
@@ -190,7 +239,7 @@ private:
 
 		if (ioctl(mFd, I2C_RDWR, &msgset) < 0)
 		{
-			fprintf(stderr, "Oh shit read %d %s\n", errno, strerror(errno));
+			fprintf(mDebugOut, "Oh shit read %d %s\n", errno, strerror(errno));
 			retval = -1;
 		}
 
@@ -200,6 +249,8 @@ private:
 
 
 private:
+
+   FILE* mDebugOut = NULL;
 
 	int mFd = -1;
 	const unsigned char mSlaveAddress = 0x68;
