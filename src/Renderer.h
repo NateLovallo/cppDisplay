@@ -15,6 +15,15 @@ class IRenderable
 {
    public:
    virtual void Render(cairo_t *cr) = 0;
+   
+   void SetPosition(double x, double y)
+   {
+      X = x;
+      Y = y;
+   }
+   protected:
+   double X = 0;
+   double Y = 0;
 };
 
 class ArcGauge : public IRenderable
@@ -48,14 +57,15 @@ class ArcGauge : public IRenderable
       uint32_t span = mMax - mMin;
       float p = float(mValue - mMin) / float(span);
       
+      
+      cairo_arc (cr, X, Y, 100, (0)*(M_PI/180.0), (p*360.0)*(M_PI/180.0));
       cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
       cairo_set_line_width (cr, 10.0);
-      cairo_arc (cr, 200, 200, 100, (0)*(M_PI/180.0), (p*360.0)*(M_PI/180.0));
       cairo_stroke (cr);
       
       cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_font_size (cr, 30.0);
-      cairo_move_to (cr, 100.0, 100.0);
+      cairo_move_to (cr, X, Y);
       
       char sText[32];
       sprintf(sText, "%u", mValue);
@@ -155,12 +165,14 @@ void RenderLoop()
             cairo_image_surface_create_for_data ((unsigned char*)pixels, CAIRO_FORMAT_ARGB32, mSizeX, mSizeY, pitch);
          cairo_t *cr=cairo_create(cairo_surface);
 
+         // black background
          cairo_set_source_rgb (cr, 0, 0, 0);
          cairo_paint (cr);
          
          for (auto& r : mRenderables)
          {
             r->Render(cr);
+            cairo_set_source_rgba (cr, 0, 0, 0, 0);
          }
 
          cairo_surface_destroy (cairo_surface);

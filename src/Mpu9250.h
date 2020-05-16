@@ -85,7 +85,7 @@ public:
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
-	void SampleTemperature()
+	int SampleTemperature()
 	{
 		unsigned char data[2] = {};
 		int r = I2CRead(MPU9250_TEMP_OUT_H, 2, data);
@@ -93,7 +93,7 @@ public:
 		(void)0;
 		int temp = (data[0] << 8) | data[1];
 
-		// data sheet says TEMP_degC = ((TEMP_OUT  RoomTemp_Offset) / Temp_Sensitivity) + 21degC
+		// data sheet says TEMP_degC = ((TEMP_OUT RoomTemp_Offset) / Temp_Sensitivity) + 21degC
 		// RoomTemp_Offset is not defined anywhere in reg map or data sheet
 		// TDK driver uses 0?
 		// TDK driver uses 321 for temp sens
@@ -104,6 +104,9 @@ public:
 		temp = (temp * 9.0f / 5.0f) + 32.0f;
 
 		//fprintf(mDebugOut, "Temp \t%d \n", temp);
+      
+      //TFW temp is actually a good variable name :)
+      return temp;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
