@@ -15,8 +15,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 Renderer::Renderer()
-:
-mThread([this](){RenderLoop();})
 {
    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
    {
@@ -48,7 +46,6 @@ mThread([this](){RenderLoop();})
 Renderer::~Renderer()
 {
    mRun = false;
-   mThread.join();
    SDL_DestroyTexture(mTexture);
    SDL_DestroyRenderer(mRenderer);
    SDL_DestroyWindow(mWindow);
@@ -62,59 +59,63 @@ void Renderer::AddItem(IRenderable* r)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Renderer::RenderLoop()
+bool Renderer::Input()
 {
-   while (mRun)
+   bool retval = false;
+   SDL_Event e;
+
+   while (SDL_PollEvent(&e) != 0)
    {
-      uint32_t startTicks = SDL_GetTicks();
-      SDL_Event e;
-
-      while (SDL_PollEvent(&e) != 0)
+      if (e.type == SDL_KEYDOWN)
       {
-         if (e.type == SDL_KEYDOWN)
-         {
-            mRun = false;
-         }
-         else if (e.type == SDL_QUIT)
-         {
-            mRun = false;
-         }
+         retval = true;
       }
-
-      SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-      SDL_RenderClear(mRenderer);
-
-      void* pixels;
-      int pitch;
-
-      if (0 == SDL_LockTexture(mTexture, NULL, &pixels, &pitch))
+      else if (e.type == SDL_QUIT)
       {
-         cairo_surface_t* cairo_surface =
-            cairo_image_surface_create_for_data((unsigned char*)pixels, CAIRO_FORMAT_ARGB32, mSizeX, mSizeY, pitch);
-         cairo_t* cr = cairo_create(cairo_surface);
-
-         // black background
-         cairo_set_source_rgb(cr, 0, 0, 0);
-         cairo_paint(cr);
-
-         for (auto& r : mRenderables)
-         {
-            r->Render(cr);
-            cairo_set_source_rgba(cr, 0, 0, 0, 0);
-         }
-
-         cairo_surface_destroy(cairo_surface);
-         cairo_destroy(cr);
-
-         SDL_UnlockTexture(mTexture);
+         retval = true;
       }
-
-      // draw to screen
-      SDL_RenderCopy(mRenderer, mTexture, NULL, NULL);
-
-      // flip buffer
-      SDL_RenderPresent(mRenderer);
-
-      SDL_Delay(20);
    }
+   
+   return retval;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void Renderer::Draw()
+{
+   uint32_t startTicks = SDL_GetTicks();
+
+
+   SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+   SDL_RenderClear(mRenderer);
+
+   void* pixels;
+   int pitch;
+
+   if (0 == SDL_LockTexture(mTexture, NULL, &pixels, &pitch))
+   {
+      cairo_surface_t* cairo_surface =
+         cairo_image_surface_create_for_data((unsigned char*)pixels, CAIRO_FORMAT_ARGB32, mSizeX, mSizeY, pitch);
+      cairo_t* cr = cairo_create(cairo_surface);
+
+      // black background
+      cairo_set_source_rgb(cr, 0, 0, 0);
+      cairo_paint(cr);
+
+      for (auto& r : mRenderables)
+      {
+         r->Render(cr);
+         cairo_set_source_rgba(cr, 0, 0, 0, 0);
+      }
+
+      cairo_surface_destroy(cairo_surface);
+      cairo_destroy(cr);
+
+      SDL_UnlockTexture(mTexture);
+   }
+
+   // draw to screen
+   SDL_RenderCopy(mRenderer, mTexture, NULL, NULL);
+
+   // flip buffer
+   SDL_RenderPresent(mRenderer);
 }

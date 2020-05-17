@@ -17,10 +17,14 @@ public:
 
    ///////////////////////////////////////////////////////////////////////////////
    void AddItem(IRenderable* r);
+   
+   bool Input();
+   
+   void Draw();
+
+
 
 private:
-
-   void RenderLoop();
 
    static constexpr unsigned int mSizeX = 800;
    static constexpr unsigned int mSizeY = 480;
@@ -32,6 +36,5 @@ private:
    bool mRun = true;
    
    std::vector<IRenderable*> mRenderables;
-   std::thread mThread;
 };
 

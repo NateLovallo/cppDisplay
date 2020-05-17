@@ -18,10 +18,11 @@ int main(int argc, char* args[])
    r.AddItem(&ag);
    r.AddItem(&tg);
    
-   for (int i = 0; i < 10000; i++)
+   while (!r.Input())
    {
       ag.Update(m.SampleAccelerometer());
       tg.Update(m.SampleTemperature());
+      r.Draw();
    }
 	
    return 0;
