@@ -1,6 +1,8 @@
-#include "src/Renderer.h"
-#include "src/Mpu9250.h"
+#include "Renderer.h"
+#include "ArcGauge.h"
+#include "Mpu9250.h"
 
+///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* args[])
 {
    Mpu9250 m;
