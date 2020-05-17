@@ -18,7 +18,12 @@ int main(int argc, char* args[])
    r.AddItem(&ag);
    r.AddItem(&tg);
    
-   while (!r.Input())
+   
+   bool run = true;
+   
+   r.AddHandler(SDL_QUIT, [&run](SDL_Event e){run = false;});
+   
+   while (run)
    {
       ag.Update(m.SampleAccelerometer());
       tg.Update(m.SampleTemperature());

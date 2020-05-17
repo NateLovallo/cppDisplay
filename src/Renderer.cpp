@@ -59,31 +59,26 @@ void Renderer::AddItem(IRenderable* r)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool Renderer::Input()
+void Renderer::AddHandler(Uint32 eventType, EventCallback e)
 {
-   bool retval = false;
-   SDL_Event e;
-
-   while (SDL_PollEvent(&e) != 0)
-   {
-      if (e.type == SDL_KEYDOWN)
-      {
-         retval = true;
-      }
-      else if (e.type == SDL_QUIT)
-      {
-         retval = true;
-      }
-   }
-   
-   return retval;
+   // make sure there isn't a handler yet
+   assert(mEventCallbacks.find(eventType) == mEventCallbacks.end());
+   mEventCallbacks[eventType] = e;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void Renderer::Draw()
 {
-   uint32_t startTicks = SDL_GetTicks();
+   SDL_Event e;
 
+   while (SDL_PollEvent(&e) != 0)
+   {
+      auto cb = mEventCallbacks.find(e.type);
+      if (cb != mEventCallbacks.end())
+      {
+         cb->second(e);
+      }
+   }
 
    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
    SDL_RenderClear(mRenderer);

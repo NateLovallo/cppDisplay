@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <vector>
-#include <thread>
-
+#include <unordered_map>
+#include <functional>
 #include "IRenderable.h"
 
 #pragma once
@@ -9,6 +9,9 @@
 class Renderer
 {
 public:
+
+   using EventCallback = std::function<void(SDL_Event e)>;
+
    ///////////////////////////////////////////////////////////////////////////////
    Renderer();
 
@@ -18,14 +21,15 @@ public:
    ///////////////////////////////////////////////////////////////////////////////
    void AddItem(IRenderable* r);
    
-   bool Input();
+   ///////////////////////////////////////////////////////////////////////////////
+   void AddHandler(Uint32 eventType, EventCallback e);
    
+   ///////////////////////////////////////////////////////////////////////////////
    void Draw();
 
-
-
 private:
-
+   
+   // TODO configurable?
    static constexpr unsigned int mSizeX = 800;
    static constexpr unsigned int mSizeY = 480;
 
@@ -36,5 +40,6 @@ private:
    bool mRun = true;
    
    std::vector<IRenderable*> mRenderables;
+   std::unordered_map<Uint32,EventCallback> mEventCallbacks; 
 };
 
