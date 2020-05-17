@@ -7,10 +7,10 @@ int main(int argc, char* args[])
    Renderer r;
 
    
-   ArcGauge ag(0, 32768);
+   ArcGauge ag(0, 32768, "Z Accel", "cts");
    ag.SetPosition(200, 200);
    
-   ArcGauge tg(0, 100);
+   ArcGauge tg(0, 100, "Temperature", "ºF");
    tg.SetPosition(600, 200);
    
    r.AddItem(&ag);
