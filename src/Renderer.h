@@ -57,19 +57,32 @@ class ArcGauge : public IRenderable
       uint32_t span = mMax - mMin;
       float p = float(mValue - mMin) / float(span);
       
+      float start = 120.0f;
+      float end = 60+360;
       
-      cairo_arc (cr, X, Y, 100, (0)*(M_PI/180.0), (p*360.0)*(M_PI/180.0));
-      cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
+      cairo_arc (cr, X, Y, 100, start*(M_PI/180.0), end*(M_PI/180.0));
+     
+      cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.5);
       cairo_set_line_width (cr, 10.0);
       cairo_stroke (cr);
       
+      float total = start + (end - start)*p;
+      
+      cairo_arc (cr, X, Y, 100, start*(M_PI/180.0), total*(M_PI/180.0));
+     
+      cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
+      cairo_set_line_width (cr, 10.0);
+      cairo_stroke (cr);
+
       cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_font_size (cr, 30.0);
       cairo_move_to (cr, X, Y);
       
       char sText[32];
-      sprintf(sText, "%u", mValue);
+      sprintf(sText, "%5u", mValue);
       cairo_show_text (cr, sText);
+      
+      cairo_stroke (cr);
    }
    
    private:
