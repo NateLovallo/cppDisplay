@@ -75,21 +75,32 @@ class ArcGauge : public IRenderable
       cairo_set_line_width (cr, 20.0);
       cairo_stroke (cr);
 
-
       cairo_select_font_face (cr, "../Gidole-Regular.ttf", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 30.0);
-      cairo_move_to (cr, X-50.0, Y);
+      
       
       char sText[32];
-      sprintf(sText, "%5u %s", mValue, mUnits.c_str());
+
+      sprintf(sText, "%6u %s", mValue, mUnits.c_str());
+      
+      // Draw the numerical printout
+      cairo_text_extents_t xt;
+      cairo_text_extents(cr, sText, &xt);
+      
+      cairo_move_to (cr, X-xt.width/2, Y);
       cairo_show_text (cr, sText);
       
       // end the stroke
       cairo_stroke (cr);
       
-      cairo_set_font_size (cr, 15.0);
-      cairo_move_to (cr, X-50.0, Y+150.0);
+      
+      // Draw the gauge title below
+      cairo_set_font_size (cr, 20.0);
+      
+      cairo_text_extents(cr, mTitle.c_str(), &xt);
+      cairo_move_to (cr, X-xt.width/2, Y+150.0);
       cairo_show_text (cr, mTitle.c_str());
+      
       // end the stroke
       cairo_stroke (cr);
    }
