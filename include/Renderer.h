@@ -28,6 +28,10 @@ public:
    void Draw();
 
 private:
+
+   void HandleEvents();
+
+private:
    
    // TODO configurable?
    static constexpr unsigned int mSizeX = 800;

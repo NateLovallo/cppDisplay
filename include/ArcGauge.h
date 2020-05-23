@@ -16,7 +16,12 @@
 class ArcGauge : public IRenderable
 {
    public:
-   ArcGauge(uint32_t min, uint32_t max, const std::string& title, const std::string& units) 
+   ArcGauge(
+   uint32_t min, 
+   uint32_t max, 
+   const std::string& title, 
+   const std::string& units
+   ) 
    : mMin(min), mMax(max), mTitle(title), mUnits(units) 
    {
       assert(mMin < mMax);

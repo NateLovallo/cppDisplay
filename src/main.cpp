@@ -5,11 +5,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* args[])
 {
+   using namespace std::literals::chrono_literals;
    Mpu9250 m;
    Renderer r;
 
    
-   ArcGauge ag(0, 32768, "Z Accel", "cts");
+   ArcGauge ag(0, 32768, "Z Acc", "cts");
    ag.SetPosition(200, 200);
    
    ArcGauge tg(0, 100, "Temperature", "ºF");
@@ -28,6 +29,7 @@ int main(int argc, char* args[])
       ag.Update(m.SampleAccelerometer());
       tg.Update(m.SampleTemperature());
       r.Draw();
+      std::this_thread::sleep_for(100ms);
    }
 	
    return 0;

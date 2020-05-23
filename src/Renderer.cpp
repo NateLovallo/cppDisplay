@@ -66,8 +66,9 @@ void Renderer::AddHandler(Uint32 eventType, EventCallback e)
    mEventCallbacks[eventType] = e;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-void Renderer::Draw()
+void Renderer::HandleEvents()
 {
    SDL_Event e;
 
@@ -79,6 +80,12 @@ void Renderer::Draw()
          cb->second(e);
       }
    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void Renderer::Draw()
+{
+   HandleEvents();
 
    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
    SDL_RenderClear(mRenderer);
