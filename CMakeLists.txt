@@ -3,7 +3,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (cppDisplay)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -g")
 
 include_directories (include)
 
