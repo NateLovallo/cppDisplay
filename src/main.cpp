@@ -19,7 +19,7 @@ int main(int argc, char* args[])
    r.AddItem(&th);
    
    ArcGauge tg("Temperature", "ºF");
-   tg.SetPosition({600, 200}, {200, 200});
+   tg.SetPosition({500, 200}, {200, 200});
    tg.SetRange(0, 100);
    r.AddItem(&tg);
    

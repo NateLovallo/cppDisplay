@@ -47,10 +47,20 @@ public:
    }
 
 protected:
+   Rect Center()
+   {
+      Rect retval;
+      retval.X = Position.X + Size.X/2.0;
+      retval.Y = Position.Y + Size.Y/2.0;
+      return retval;
+   }
+
+protected:
    Rect Position;
    Rect Size;
    double CurrentValue = 0.0;
    double Min = 0.0;
    double Max = 1.0;
+
 };
 

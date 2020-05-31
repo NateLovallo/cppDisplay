@@ -29,21 +29,27 @@ class ArcGauge : public IRenderable
    
    void Render(cairo_t *cr) override final
    {
+      Rect center = Center();
+
+      cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.5);
+      cairo_rectangle(cr, Position.X, Position.Y, Size.X, Size.Y);
+      cairo_fill (cr);
+
       double span = Max - Min;
       float p = float(CurrentValue - Min) / float(span);
       
       float start = 120.0f;
       float end = 60+360;
-      
-      cairo_arc (cr, Position.X, Position.Y, Size.X/2.0, start*(M_PI/180.0), end*(M_PI/180.0));
+
+      cairo_arc (cr, center.X, center.Y, Size.X/2.0, start*(M_PI/180.0), end*(M_PI/180.0));
      
-      cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 0.5);
+      cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1);
       cairo_set_line_width (cr, Size.X/20.0);
       cairo_stroke (cr);
       
       float total = start + (end - start)*p;
       
-      cairo_arc (cr, Position.X, Position.Y, Size.X/2.0, start*(M_PI/180.0), total*(M_PI/180.0));
+      cairo_arc (cr, center.X, center.Y, Size.X/2.0, start*(M_PI/180.0), total*(M_PI/180.0));
      
       cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
       cairo_set_line_width (cr, Size.X/10.0);
@@ -60,7 +66,7 @@ class ArcGauge : public IRenderable
       cairo_text_extents_t xt;
       cairo_text_extents(cr, sText, &xt);
       
-      cairo_move_to (cr, Position.X-xt.width/2, Position.Y-xt.height/2);
+      cairo_move_to (cr, center.X-xt.width/2, center.Y-xt.height/2);
       cairo_show_text (cr, sText);
       
       // end the stroke
@@ -70,7 +76,7 @@ class ArcGauge : public IRenderable
       cairo_set_font_size (cr, 20.0);
       
       cairo_text_extents(cr, mTitle.c_str(), &xt);
-      cairo_move_to (cr, Position.X-xt.width/2, Position.Y+150.0-xt.height/2);
+      cairo_move_to (cr, center.X-xt.width/2, center.Y+150.0-xt.height/2);
       cairo_show_text (cr, mTitle.c_str());
       
       // end the stroke

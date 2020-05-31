@@ -44,7 +44,7 @@ public:
 
       size_t itemNo = 0;
 
-      for (auto item = mHistory.begin(); item < mHistory.end(); item++)
+      for (auto item = mHistory.end()-1; item >= mHistory.begin(); item--)
       {
          double percentage = double(*item - Min) / double(span);
          double x = Position.X + itemNo*width;
