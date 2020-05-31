@@ -41,7 +41,7 @@ class ArcGauge : public IRenderable
       float start = 120.0f;
       float end = 60+360;
 
-      cairo_arc (cr, center.X, center.Y, Size.X/2.0, start*(M_PI/180.0), end*(M_PI/180.0));
+      cairo_arc (cr, center.X, center.Y, Size.X/2.50, start*(M_PI/180.0), end*(M_PI/180.0));
      
       cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, 1);
       cairo_set_line_width (cr, Size.X/20.0);
@@ -49,7 +49,7 @@ class ArcGauge : public IRenderable
       
       float total = start + (end - start)*p;
       
-      cairo_arc (cr, center.X, center.Y, Size.X/2.0, start*(M_PI/180.0), total*(M_PI/180.0));
+      cairo_arc (cr, center.X, center.Y, Size.X/2.50, start*(M_PI/180.0), total*(M_PI/180.0));
      
       cairo_set_source_rgba (cr, 0, 1, 0, 0.5);
       cairo_set_line_width (cr, Size.X/10.0);

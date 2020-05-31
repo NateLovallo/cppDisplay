@@ -32,7 +32,7 @@ int main(int argc, char* args[])
       th.SetValue(m.SampleTemperature());
       tg.SetValue(m.SampleTemperature());
       r.Draw();
-      std::this_thread::sleep_for(1000ms);
+      std::this_thread::sleep_for(100ms);
    }
 	
    return 0;

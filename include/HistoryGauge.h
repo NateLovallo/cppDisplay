@@ -53,7 +53,7 @@ public:
          double y = Position.Y + Size.Y - height;
 
          cairo_set_source_rgba (cr, 0, 1, 0, 1);
-         cairo_rectangle(cr, x, y, width-1, y+height);
+         cairo_rectangle(cr, x, y, width-1, height);
          //cairo_stroke (cr);
          cairo_fill (cr);
 
